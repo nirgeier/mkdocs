@@ -15,26 +15,25 @@
 .md-source-file__fact {
   align-items: center;
   color: rgba(0, 0, 0, 0.54);
-  display: flex;
   font-size: 0.64rem;
   gap: 0.5rem;
   margin: 0.25rem 0;
+  vertical-align: middle;
 }
 
 /* Navigation container for authors/committers */
 .md-source-file__fact nav {
-  display: flex;
   align-items: center;
   gap: 0.25rem;
   flex-wrap: wrap;
 }
 
 /* Author avatar styling */
-.md-author {
+.md-typeset a.md-author img {
   border-radius: 50%;
   display: inline-block;
-  height: 1.6rem;
-  width: 1.6rem;
+  height: 32px;
+  width: 32px;
   overflow: hidden;
   transition: transform 0.2s ease;
 }
