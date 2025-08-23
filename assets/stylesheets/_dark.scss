@@ -52,17 +52,21 @@
   }
 
   .md-nav__link[for]:focus,
-  .md-nav__link[for]:hover,
   .md-nav__link[href]:focus,
-  .md-nav__link[href]:hover,
   .md-nav--secondary .md-nav__link--active {
-    color: black;
-    background: #f7d078;
-    border-radius: 5px;
-    padding: 0 5px;
-    margin-left: -5px;
+    color: #03dac5 !important;
   }
 
+  .md-nav__link[for]:hover,
+  .md-nav__link[href]:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    color: #f2a71b;
+    margin-left: -5px;
+    outline-offset: -1px;
+    outline: solid 0.0625rem rgba(0, 0, 0, 0) !important;
+    padding: 0 5px;
+  }
   .md-content a {
     color: #df3079;
   }
