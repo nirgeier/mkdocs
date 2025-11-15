@@ -18,10 +18,14 @@ jobs:
         with:
           python-version: '3.x'
 
+      # Step 1.5: Install uv
+      - name: Install uv
+        run: pip install uv
+
       # Step 2: Install dependencies (MkDocs, Material, vevv dependencies, etc.)
       # Assuming you have a requirements.txt file that lists all dependencies
       - name: Install dependencies
-        run: pip install -r mkdocs/requirements.txt
+        run:  uv pip install -r mkdocs/requirements.txt
 
       # Step 3: Build the MkDocs site
       # The mkdocs build command will output the static files to the 'site' directory

@@ -8,7 +8,7 @@
 
 [Live Demo](https://nirgeier.github.io/mkdocs/)
 
-![Screenshot of the MkDocs Template](./Labs/assets/images/site-screenshot.png)
+![Screenshot of the MkDocs Template](./mkdocs/overrides/assets/images/site-screenshot.png)
 
 ---
 
@@ -32,26 +32,36 @@
 ## 📁 Project Structure
 
 ```text
-
-📂 mkdocs                         # Root project directory
+📂 [project-root]                  # Root project directory
  ┣ 📄 README.md                   # This file - project documentation
- ┣ ⚙️ init_site.sh                # Automated setup script
- ┣ 📦 requirements.txt            # Python dependencies
  ┣ 📝 mkdocs.yml                  # Generated configuration file
+ ┣ 📄 vercel.json                 # Vercel deployment configuration
  ┣ 📂 Labs                        # Your documentation content
- ┃ ┣ 📄 README.md                 # Homepage content
- ┃ ┗ 📂 assets                    # Images, stylesheets, and other assets
+ ┃ ┣ 📄 index.md                  # Homepage content
+ ┃ ┗ 📄 welcome.md                # Welcome page
  ┣ 📂 mkdocs                      # Modular configuration files
  ┃ ┣ 📝 01-mkdocs-site.yml        # Basic site configuration
  ┃ ┣ 🎨 02-mkdocs-theme.yml       # Material theme settings
  ┃ ┣ ➕ 03-mkdocs-extra.yml       # Extra features and social links
  ┃ ┣ 🔌 04-mkdocs-plugins.yml     # Plugin configurations
  ┃ ┣ 🧩 05-mkdocs-extensions.yml  # Markdown extensions
- ┃ ┗ 📑 06-mkdocs-nav.yml         # Navigation structure
- ┗ 📂 overrides                   # Theme customizations
-   ┣ 🧩 header.html               # Custom header
-   ┣ 🏠 home.html                 # Custom homepage
-   ┗ 📂 partials                  # Custom partial templates
+ ┃ ┣ 📑 06-mkdocs-nav.yml         # Navigation structure
+ ┃ ┣ 📦 requirements.txt          # Python dependencies
+ ┃ ┣ 📂 overrides                 # Theme customizations
+ ┃ ┃ ┣ 🏠 home.html               # Custom homepage
+ ┃ ┃ ┣ 📂 assets                  # Static assets
+ ┃ ┃ ┣ 📂 partials                # Custom partial templates
+ ┃ ┃ ┗ 📂 stylesheets             # Custom stylesheets
+ ┃ ┗ 📂 scripts                   # Utility scripts
+ ┃   ┣ 🧭 build_nav.sh            # Dynamic navigation builder
+ ┃   ┣ 🏗️ build-multiarch.sh      # Multi-architecture build script
+ ┃   ┣ ⚙️ init_site.sh            # Automated setup script
+ ┃   ┗ ⚙️ init_vercel.sh          # Vercel deployment initializer
+ ┗ 📂 mkdocs-site                 # Built documentation site (generated)
+   ┣ 📄 index.html                # Main site files
+   ┣ 📂 assets                    # Compiled assets
+   ┣ 📂 search                    # Search index
+   ┗ 📂 welcome                   # Welcome page
 ```
 
 ## 🛠️ Quick Start
@@ -75,7 +85,7 @@
 3. **Run the automated setup script**
 
    ```bash
-   ./init_site.sh
+   ./mkdocs/scripts/init_site.sh
    ```
 
 The script will automatically:
@@ -99,7 +109,7 @@ The script will automatically:
 2. **Install dependencies**
 
    ```bash
-   pip install -r requirements.txt
+   uv pip install -r mkdocs/requirements.txt
    ```
 
 3. **Configure your site**
@@ -216,7 +226,7 @@ To customize your site:
        - uses: actions/setup-python@v4
          with:
            python-version: 3.x
-       - run: pip install -r requirements.txt
+       - run: uv pip install -r requirements.txt
        - run: cat mkdocs/*.yml > mkdocs.yml
        - run: mkdocs gh-deploy --force
    ```
@@ -232,6 +242,34 @@ mkdocs build
 # Upload contents of mkdocs-site/ to your hosting provider
 ```
 
+### Vercel Deployment (Automatic)
+
+1. **Install Vercel CLI** (if not already installed)
+
+   ```bash
+   npm install -g vercel
+   ```
+
+2. **Login to Vercel**
+
+   ```bash
+   vercel login
+   ```
+
+3. **Run the Vercel initialization script**
+
+   ```bash
+   ./mkdocs/scripts/init_vercel.sh
+   ```
+
+   Or manually:
+
+   ```bash
+   vercel --prod
+   ```
+
+The `vercel.json` configuration file is already set up for automatic builds on Vercel.
+
 ## 🔧 Advanced Usage
 
 ### Setup Script Options
@@ -239,10 +277,10 @@ mkdocs build
 The `init_site.sh` script supports several options:
 
 ```bash
-./init_site.sh --help           # Show help
-./init_site.sh --no-serve       # Build but don't start server
-./init_site.sh --clean          # Clean build directory first
-./init_site.sh --verbose        # Enable verbose output
+./mkdocs/scripts/init_site.sh --help           # Show help
+./mkdocs/scripts/init_site.sh --no-serve       # Build but don't start server
+./mkdocs/scripts/init_site.sh --clean          # Clean build directory first
+./mkdocs/scripts/init_site.sh --verbose        # Enable verbose output
 ```
 
 ### Environment Variables
@@ -272,19 +310,19 @@ This template includes a powerful navigation builder script (`build_nav.sh`) tha
 
 ```bash
 # Generate navigation with default settings
-./build_nav.sh
+./mkdocs/scripts/build_nav.sh
 
 # Preview what would be generated
-./build_nav.sh --dry-run
+./mkdocs/scripts/build_nav.sh --dry-run
 
 # Sort using numeric prefixes (01-, 02-, etc.)
-./build_nav.sh --sort numeric
+./mkdocs/scripts/build_nav.sh --sort numeric
 
 # Include draft files
-./build_nav.sh --include-drafts
+./mkdocs/scripts/build_nav.sh --include-drafts
 
 # Show all available options
-./build_nav.sh --help
+./mkdocs/scripts/build_nav.sh --help
 ```
 
 ### Integration
@@ -356,7 +394,3 @@ If you encounter any issues or have questions:
 ---
 
 **Happy documenting!** 📖✨
-
-<br/>
-<br/>
-<br/>

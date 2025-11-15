@@ -9,7 +9,7 @@ set -euo pipefail
 IFS=$'\n\t'
 
 SCRIPT_NAME=$(basename "$0")
-REPO_ROOT=$(cd "$(dirname "$0")/.." && pwd)
+PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
 
 # Defaults
 DEFAULT_CONTEXT="."
@@ -90,8 +90,8 @@ done
 # Determine tags default: latest + git short sha if available
 if [[ -z "$TAGS" ]]; then
   TAGS="latest"
-  if command -v git >/dev/null 2>&1 && [[ -d "$REPO_ROOT/.git" ]]; then
-    GIT_SHA=$(git -C "$REPO_ROOT" rev-parse --short HEAD 2>/dev/null || true)
+  if command -v git >/dev/null 2>&1 && [[ -d "$PROJECT_ROOT/.git" ]]; then
+    GIT_SHA=$(git -C "$PROJECT_ROOT" rev-parse --short HEAD 2>/dev/null || true)
     if [[ -n "$GIT_SHA" ]]; then
       TAGS+=",$REPO:$GIT_SHA"
     fi
@@ -185,8 +185,8 @@ if [[ "$PUSH" == true ]]; then
 else
   # For multi-platform builds, --load only supports a single platform. Warn user and set output to local tar files.
   echo "Note: Multi-platform local loads are limited. For multiple platforms the script will export separate tar files in ./multiarch-output." >&2
-  mkdir -p "$REPO_ROOT/multiarch-output"
-  build_cmd+=(--output "type=tar,dest=$REPO_ROOT/multiarch-output/image-{{.Platform}}.tar")
+  mkdir -p "$PROJECT_ROOT/multiarch-output"
+  build_cmd+=(--output "type=tar,dest=$PROJECT_ROOT/multiarch-output/image-{{.Platform}}.tar")
 fi
 
 # Context
@@ -201,7 +201,7 @@ echo
 
 # Execute the build command safely using the array (avoids word-splitting/eval issues)
 (
-  cd "$REPO_ROOT" && 
+  cd "$PROJECT_ROOT" && 
   "${build_cmd[@]}"
 )
 
@@ -218,7 +218,7 @@ if [[ "$PUSH" == true ]]; then
     echo "  - $tt"
   done
 else
-  echo "Tar artifacts saved to: $REPO_ROOT/multiarch-output/"
+  echo "Tar artifacts saved to: $PROJECT_ROOT/multiarch-output/"
 fi
 
 exit 0

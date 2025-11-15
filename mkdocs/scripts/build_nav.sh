@@ -2,7 +2,7 @@
 # Dynamic Navigation Builder for MkDocs
 # Automatically generates navigation structure based on content in Labs folder
 
-set -euo pipefail  # Exit on error, undefined vars, pipe failures
+set -eo pipefail  # Exit on error, pipe failures
 
 # Get the root of the Git Project
 PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
@@ -210,19 +210,10 @@ generate_dir_title() {
     local dir_name="$1"
     local title=""
     
-    # Check if directory has README.md and extract title from it
-    if [[ -f "$LABS_DIR/$dir_name/README.md" ]]; then
-        title=$(extract_title "$LABS_DIR/$dir_name/README.md")
-    fi
-    
-    # If no title from README, generate from directory name
-    if [[ -z "$title" ]]; then
-        title="$dir_name"
-        # Remove numeric prefixes
-        title=$(echo "$title" | sed 's/^[0-9][0-9]*[.-][[:space:]]*//')
-        # Convert hyphens and underscores to spaces and title case
-        title=$(echo "$title" | tr '_-' ' ' | sed 's/\b\w/\U&/g')
-    fi
+    # Generate from directory name
+    title="$dir_name"
+    # Convert hyphens and underscores to spaces and title case
+    title=$(echo "$title" | tr '_-' ' ' | awk 'BEGIN{FS=OFS=" "} {for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2)}1')
     
     echo "$title"
 }
@@ -314,6 +305,7 @@ generate_nav_for_directory() {
     local indent_level="$2"
     local indent=""
     local full_path="$LABS_DIR/$dir_path"
+    local items=()
     
     # Create indentation
     for ((i=0; i<indent_level*2; i++)); do
@@ -327,7 +319,6 @@ generate_nav_for_directory() {
     fi
     
     # Get all items in directory
-    local items=()
     while IFS= read -r -d '' item; do
         local relative_item
         relative_item=$(get_relative_path "$item" "$LABS_DIR")
@@ -335,7 +326,10 @@ generate_nav_for_directory() {
         if [[ -d "$item" ]]; then
             # Skip assets directory
             if [[ "$(basename "$item")" != "assets" ]]; then
-                items+=("DIR:$relative_item")
+                # Only include directories that contain at least one .md file
+                if find "$item" -maxdepth 1 -name "*.md" | grep -q .; then
+                    items+=("DIR:$relative_item")
+                fi
             fi
         elif should_include_file "$relative_item"; then
             items+=("FILE:$relative_item")
@@ -344,17 +338,22 @@ generate_nav_for_directory() {
     
     # Sort items
     local sorted_items=()
-    while IFS= read -r item; do
-        sorted_items+=("$item")
-    done < <(printf '%s\n' "${items[@]}" | sed 's/^[^:]*://' | sort_files | while read -r sorted_item; do
-        # Find the original item type
-        for original_item in "${items[@]}"; do
-            if [[ "$original_item" =~ :.*"$sorted_item"$ ]]; then
-                echo "$original_item"
+    local paths=()
+    for item in "${items[@]}"; do
+        paths+=("${item#*:}")
+    done
+    local sorted_paths=()
+    while IFS= read -r path; do
+        sorted_paths+=("$path")
+    done < <(printf '%s\n' "${paths[@]}" | sort_files)
+    for sorted_path in "${sorted_paths[@]}"; do
+        for item in "${items[@]}"; do
+            if [[ "$item" == *:"$sorted_path" ]]; then
+                sorted_items+=("$item")
                 break
             fi
         done
-    done)
+    done
     
     # Process README.md first if it exists
     local readme_path="$dir_path/README.md"

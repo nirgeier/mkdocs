@@ -218,11 +218,14 @@ generate_urls() {
 }
 
 #######################################
-# Update a YAML field if it's empty
+# Update a YAML field in a configuration file if the field is empty.
 # Arguments:
 #   $1: field name (e.g., "site_name")
-#   $2: field value
-#   $3: config file path
+#   $2: field value to set if empty
+#   $3: path to the YAML config file
+# Returns:
+#   0 if successful, 1 if config file not found
+#   Prints info/warning messages about the update status
 #######################################
 update_yaml_field_if_empty() {
     local field_name="$1"
@@ -234,9 +237,14 @@ update_yaml_field_if_empty() {
         return 1
     fi
     
-    if grep -q "^${field_name}:$" "$config_file"; then
+    # Check if field doesn't exist at all
+    if ! grep -q "^${field_name}:" "$config_file"; then
+        print_info "Adding $field_name to: $field_value"
+        echo "${field_name}: ${field_value}" >> "$config_file"
+    # Check if field exists but is empty or contains only whitespace/empty quotes/null
+    elif grep -q "^${field_name}:\s*\(\"\s*\"\|'\s*'\|null\|~\|\)\s*$" "$config_file" || grep -q "^${field_name}:\s*$" "$config_file"; then
         print_info "Setting $field_name to: $field_value"
-        sed -i.bak "s|^${field_name}:$|${field_name}: ${field_value}|g" "$config_file"
+        sed -i.bak "s|^${field_name}:.*$|${field_name}: ${field_value}|g" "$config_file"
     else
         print_warning "$field_name already has a value, skipping"
     fi
@@ -293,8 +301,6 @@ update_copyright_year() {
     
     # Clean up backup file
     rm -f "${theme_config_file}.bak"
-    
-    print_success "Updated copyright year to $current_year"
 }
 
 #######################################
@@ -378,11 +384,11 @@ setup_python_env() {
         source "$VENV_DIR/bin/activate"
         
         print_info "Upgrading pip..."
-        pip install --upgrade pip
+        uv pip install --upgrade pip
         
         if [[ -f "$REQUIREMENTS_FILE" ]]; then
             print_info "Installing requirements from $REQUIREMENTS_FILE..."
-            pip install -r "$REQUIREMENTS_FILE"
+            uv pip install -r "$REQUIREMENTS_FILE"
         else
             print_warning "Requirements file not found: $REQUIREMENTS_FILE"
         fi

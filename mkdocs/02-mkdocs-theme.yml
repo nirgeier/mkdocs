@@ -19,7 +19,7 @@ theme:
     - content.tooltips
     - content.footer.last-updated
     - content.footer.contributors
-    - navigation.expand: true
+    - navigation.expand: false
     - navigation.footer
     - navigation.indexes
     - navigation.instant
@@ -36,13 +36,14 @@ theme:
     - search.suggest
     - toc.follow
     - toc.integrate
+    - toc.sticky
+    
     #- header.autohide  # Disabled to keep top nav always visible
-    - toc.integrate
+    
   # 👈 enables avatar display
   palette:
     # Dark mode only
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
+    - scheme: slate
       primary: indigo # You can choose any color here
 
   font:

@@ -3,4 +3,6 @@
 ###
 
 nav:
-  - Documentation Site Template: README.md
+  - Start Here: welcome.md
+  - Labs:
+      - index.md
